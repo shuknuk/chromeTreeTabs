@@ -233,6 +233,36 @@ function createGroupNode(group, bucketTabIds) {
         }
     });
 
+    // --- Drop Target for Groups ---
+    // Allow dragging a tab INTO this group header/container
+    header.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Essential to allow dropping
+        header.classList.add('drag-over');
+        e.dataTransfer.dropEffect = 'move';
+    });
+
+    header.addEventListener('dragleave', (e) => {
+        header.classList.remove('drag-over');
+    });
+
+    header.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        header.classList.remove('drag-over');
+
+        if (draggedTabId) {
+            try {
+                // Group the dragged tab into this group
+                // Note: This effectively "moves" it to the group visually.
+                await chrome.tabs.group({
+                    tabIds: [draggedTabId],
+                    groupId: group.id
+                });
+            } catch (err) {
+                console.error("Failed to add tab to group:", err);
+            }
+        }
+    });
+
     // Expand Arrow
     const arrow = document.createElement('div');
     arrow.className = `expand-arrow ${group.collapsed ? '' : 'rotated'}`; // rotated = expanded

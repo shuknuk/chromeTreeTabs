@@ -184,6 +184,13 @@ body {
     opacity: 0.8;
 }
 
+.group-header.drag-over {
+    background: var(--active-bg);
+    outline: 2px dashed var(--accent-color);
+    outline-offset: -2px;
+    border-radius: 6px;
+}
+
 .group-header .expand-arrow {
     margin-right: 6px;
     width: 14px;
