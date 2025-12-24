@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadParentOverrides();
         await loadCustomTitles();
         await fetchAndRenderTabs();
+        if (chrome.bookmarks) {
+            await fetchAndRenderBookmarks();
+        }
     } catch (err) {
         console.error("ZenTree Init Error:", err);
         document.body.innerHTML = `<div style="padding:20px; color:red;">Error loading ZenTree:<br>${err.message}</div>`;
@@ -717,4 +720,137 @@ async function nestTab(childId, parentId) {
     fetchAndRenderTabs();
 }
 
-// ... (End of file, removed syncGroups) ...
+// --- Bookmarks Logic ---
+
+async function fetchAndRenderBookmarks() {
+    const listEl = document.getElementById('bookmarks-list');
+    if (!listEl) return;
+    listEl.innerHTML = ''; // Clear
+
+    try {
+        const tree = await chrome.bookmarks.getTree();
+        // tree[0] is the root which contains "Bookmarks Bar", "Other Bookmarks", etc.
+        // We usually want to render the children of the root directly to avoid "Root" folder.
+        if (tree[0].children) {
+            tree[0].children.forEach(node => {
+                listEl.appendChild(createBookmarkNode(node));
+            });
+        }
+    } catch (err) {
+        console.error("Failed to load bookmarks", err);
+        listEl.innerHTML = `<div style="padding:10px; color:var(--text-secondary);">Error loading bookmarks.</div>`;
+    }
+}
+
+function createBookmarkNode(node) {
+    const isFolder = !node.url;
+    const container = document.createElement('div');
+    container.className = 'bookmark-node';
+
+    const item = document.createElement('div');
+    item.className = `bookmark-item ${isFolder ? 'bookmark-folder' : ''}`;
+
+    // Icon / Arrow
+    if (isFolder) {
+        const arrow = document.createElement('div');
+        arrow.className = 'folder-arrow';
+        arrow.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+        item.appendChild(arrow);
+
+        const icon = document.createElement('div');
+        icon.className = 'folder-icon';
+        icon.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+        item.appendChild(icon);
+    } else {
+        const favicon = document.createElement('img');
+        favicon.className = 'bookmark-favicon';
+        favicon.src = getFaviconUrl({ url: node.url }); // Reuse existing helper
+        favicon.onerror = () => { favicon.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="%23ccc"><circle cx="7" cy="7" r="7"/></svg>'; };
+        item.appendChild(favicon);
+    }
+
+    const title = document.createElement('span');
+    title.textContent = node.title || (isFolder ? 'Untitled Folder' : 'Untitled');
+    title.style.overflow = 'hidden';
+    title.style.textOverflow = 'ellipsis';
+    item.appendChild(title);
+
+    container.appendChild(item);
+
+    // Children
+    if (isFolder) {
+        const childrenContainer = document.createElement('div');
+        childrenContainer.className = 'bookmark-children';
+        // Check if we want to expand by default? Maybe only "Bookmarks Bar"?
+        // For now start collapsed unless we save state (out of scope for quick task, but better UX).
+
+        // Render children
+        if (node.children) {
+            node.children.forEach(child => {
+                childrenContainer.appendChild(createBookmarkNode(child));
+            });
+        }
+
+        container.appendChild(childrenContainer);
+
+        // Events
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isExpanded = childrenContainer.classList.contains('expanded');
+            if (isExpanded) {
+                childrenContainer.classList.remove('expanded');
+                item.querySelector('.folder-arrow').classList.remove('rotated');
+            } else {
+                childrenContainer.classList.add('expanded');
+                item.querySelector('.folder-arrow').classList.add('rotated');
+            }
+        });
+    } else {
+        // Link Event
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const active = e.ctrlKey || e.metaKey ? false : true; // Ctrl+Click = background
+            chrome.tabs.create({ url: node.url, active: active });
+        });
+    }
+
+    return container;
+}
+
+// Refresh Button Listener
+document.addEventListener('DOMContentLoaded', () => {
+    const refreshBtn = document.getElementById('refresh-bookmarks');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', fetchAndRenderBookmarks);
+    }
+    // Also listen to bookmark events to auto-update?
+    // chrome.bookmarks.onCreated.addListener(fetchAndRenderBookmarks);
+    // chrome.bookmarks.onRemoved.addListener(fetchAndRenderBookmarks);
+    // chrome.bookmarks.onChanged.addListener(fetchAndRenderBookmarks);
+    // chrome.bookmarks.onMoved.addListener(fetchAndRenderBookmarks);
+    // For now, static load on init is fine, but adding listeners is strictly better.
+    if (chrome.bookmarks) {
+        chrome.bookmarks.onCreated.addListener(() => fetchAndRenderBookmarks());
+        chrome.bookmarks.onRemoved.addListener(() => fetchAndRenderBookmarks());
+        chrome.bookmarks.onChanged.addListener(() => fetchAndRenderBookmarks());
+        chrome.bookmarks.onMoved.addListener(() => fetchAndRenderBookmarks());
+    }
+
+    // Toggle Bookmarks Logic
+    const toggleBtn = document.getElementById('toggle-bookmarks-btn');
+    const bookmarksSection = document.getElementById('bookmarks-section');
+    const divider = document.querySelector('.section-divider');
+
+    // Default to hidden
+    if (bookmarksSection) bookmarksSection.classList.add('hidden');
+    if (divider) divider.classList.add('hidden');
+
+    if (toggleBtn && bookmarksSection) {
+        toggleBtn.addEventListener('click', () => {
+            bookmarksSection.classList.toggle('hidden');
+            if (divider) divider.classList.toggle('hidden');
+            // Toggle active state on button if desired
+            toggleBtn.style.color = bookmarksSection.classList.contains('hidden') ? '' : 'var(--accent-color)';
+        });
+    }
+});
