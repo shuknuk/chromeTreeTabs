@@ -212,6 +212,15 @@ function renderTree(groupsMap) {
             tabsListEl.appendChild(createGroupNode(el.group, el.children));
         }
     });
+
+    // Auto-scroll to active tab (New Tab or Switched Tab)
+    // block: 'nearest' ensures we only scroll if it's out of view
+    const activeTabEl = tabsListEl.querySelector('.tab-item.active');
+    if (activeTabEl) {
+        setTimeout(() => {
+            activeTabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 10);
+    }
 }
 
 function createGroupNode(group, bucketTabIds) {
