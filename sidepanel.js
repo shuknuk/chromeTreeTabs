@@ -10,6 +10,7 @@ let rootTabs = []; // Array of tabIds that are roots
 let collapsedState = new Set(); // Set of tabIds whose children are hidden
 let parentOverrides = new Map(); // childId -> parentId
 let customTitles = new Map(); // tabId -> String
+let pendingScrollTabId = null;
 
 const tabsListEl = document.getElementById('tabs-list');
 const searchInput = document.getElementById('tab-search');
@@ -213,13 +214,27 @@ function renderTree(groupsMap) {
         }
     });
 
-    // Auto-scroll to active tab (New Tab or Switched Tab)
-    // block: 'nearest' ensures we only scroll if it's out of view
-    const activeTabEl = tabsListEl.querySelector('.tab-item.active');
-    if (activeTabEl) {
-        setTimeout(() => {
-            activeTabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 10);
+    // Auto-scroll logic
+    // Priority: Explicit pending scroll (New Tab) > Active Tab
+    if (pendingScrollTabId) {
+        const newTabNode = tabsListEl.querySelector(`.tab-tree-node[data-tab-id="${pendingScrollTabId}"]`);
+        if (newTabNode) {
+            const row = newTabNode.querySelector('.tab-item');
+            if (row) {
+                setTimeout(() => {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 10);
+            }
+        }
+        pendingScrollTabId = null;
+    } else {
+        // Fallback: Auto-scroll to active tab
+        const activeTabEl = tabsListEl.querySelector('.tab-item.active');
+        if (activeTabEl) {
+            setTimeout(() => {
+                activeTabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 10);
+        }
     }
 }
 
@@ -486,11 +501,69 @@ function scheduleRender() {
     }, 50); // Small buffer
 }
 
-function onTabCreated() { scheduleRender(); }
-function onTabUpdated() { scheduleRender(); }
+function onTabCreated(tab) {
+    pendingScrollTabId = tab.id;
+    scheduleRender();
+}
 function onTabRemoved() { scheduleRender(); }
-function onTabActivated() { scheduleRender(); }
 function onTabMoved() { scheduleRender(); }
+
+function onTabActivated(activeInfo) {
+    // Optimization: Don't re-render whole tree, just update class
+    const prevActive = document.querySelector('.tab-item.active');
+    if (prevActive) prevActive.classList.remove('active');
+
+    const newActiveContainer = document.querySelector(`.tab-tree-node[data-tab-id="${activeInfo.tabId}"]`);
+    if (newActiveContainer) {
+        const newActive = newActiveContainer.querySelector('.tab-item');
+        if (newActive) {
+            newActive.classList.add('active');
+            // Smooth scroll to view
+            setTimeout(() => {
+                newActive.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 10);
+        }
+    } else {
+        // Fallback if not found (e.g. new window or not rendered yet)
+        scheduleRender();
+    }
+}
+
+function onTabUpdated(tabId, changeInfo, tab) {
+    // Optimization: Update specific fields directly in DOM
+    const container = document.querySelector(`.tab-tree-node[data-tab-id="${tabId}"]`);
+    if (!container) {
+        // Tab not in DOM? structural change or new tab?
+        return scheduleRender();
+    }
+
+    if (changeInfo.status === 'loading') {
+        // Optional: Set favicon to spinner?
+        // For now, we can just ensure we re-fetch favicon if it changes
+    }
+
+    // Title Change
+    if (changeInfo.title) {
+        const titleEl = container.querySelector('.tab-title');
+        // Only update if not custom title (or if we want to sync)
+        if (titleEl && !customTitles.has(tabId)) {
+            titleEl.textContent = changeInfo.title;
+        }
+    }
+
+    // Favicon Change
+    if (changeInfo.favIconUrl) {
+        const faviconEl = container.querySelector('.tab-favicon');
+        if (faviconEl) {
+            faviconEl.src = getFaviconUrl(tab);
+        }
+    }
+
+    // Pinned status or Group change usually requires re-sort/re-structure
+    if (changeInfo.pinned !== undefined || changeInfo.groupId !== undefined) {
+        scheduleRender();
+    }
+}
 
 // --- Persistence ---
 
