@@ -231,7 +231,8 @@ function buildTree(tabs, groupsMap) {
     tabs.forEach(tab => {
         const inGroup = tab.groupId !== -1;
 
-        const isNewTab = (tab.pendingUrl === 'chrome://newtab/' || tab.url === 'chrome://newtab/' || tab.title === 'New Tab');
+        const effectiveUrl = tab.pendingUrl || tab.url;
+        const isNewTab = (effectiveUrl === 'chrome://newtab/' || effectiveUrl === 'edge://newtab/');
 
         // If it implies a fresh start, we force it to be a root forever by saving an override
         // We use -1 to signify "Explicitly Root"
