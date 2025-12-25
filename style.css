@@ -241,7 +241,108 @@ input:checked+.slider:before {
 }
 
 
-/* --- Granular Themes --- */
+/* --- Theme Selector --- */
+.setting-row.vertical {
+    display: block;
+    text-align: left;
+}
+
+.theme-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.theme-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 0;
+}
+
+.theme-swatch:hover {
+    transform: scale(1.1);
+}
+
+.theme-swatch.active {
+    box-shadow: 0 0 0 2px var(--glass-bg), 0 0 0 4px var(--accent-color);
+    border-color: transparent !important;
+    /* override inline style border if needed, usually managed by JS or class */
+}
+
+/* --- Granular Themes (Presets) --- */
+
+/* Default is defined in :root. We override vars for specific theme classes */
+
+/* Sunset */
+body.theme-sunset {
+    --orb-1: #ff9a9e;
+    --orb-2: #fecfef;
+    --accent-color: #ff6b6b;
+    --accent-glow: rgba(255, 107, 107, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.theme-sunset {
+        --orb-1: #5e2a2a;
+        --orb-2: #4a1e35;
+        --accent-color: #ff8e8e;
+    }
+}
+
+/* Forest */
+body.theme-forest {
+    --orb-1: #84fab0;
+    --orb-2: #8fd3f4;
+    --accent-color: #00b894;
+    --accent-glow: rgba(0, 184, 148, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.theme-forest {
+        --orb-1: #1e3c2f;
+        --orb-2: #162f3a;
+        --accent-color: #55efc4;
+    }
+}
+
+/* Berry */
+body.theme-berry {
+    --orb-1: #a18cd1;
+    --orb-2: #fbc2eb;
+    --accent-color: #9b59b6;
+    --accent-glow: rgba(155, 89, 182, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.theme-berry {
+        --orb-1: #2e1e3e;
+        --orb-2: #3a162e;
+        --accent-color: #be93d4;
+    }
+}
+
+/* Monochrome */
+body.theme-monochrome {
+    --orb-1: #bdc3c7;
+    --orb-2: #ecf0f1;
+    --accent-color: #2c3e50;
+    --accent-glow: rgba(44, 62, 80, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.theme-monochrome {
+        --orb-1: #2c3e50;
+        --orb-2: #34495e;
+        --accent-color: #ecf0f1;
+        --text-primary: #ffffff;
+    }
+}
+
+/* --- Granular Themes (No Mesh / Flat) --- */
 
 /* 1. No Mesh */
 body.no-mesh::before,

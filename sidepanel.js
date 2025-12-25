@@ -63,10 +63,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Theme Selector Logic
+    const themeSwatches = document.querySelectorAll('.theme-swatch');
+
+    // Helper to update active swatch UI
+    const updateActiveSwatch = (activeTheme) => {
+        themeSwatches.forEach(swatch => {
+            if (swatch.dataset.theme === activeTheme) {
+                swatch.classList.add('active');
+            } else {
+                swatch.classList.remove('active');
+            }
+        });
+    };
+
+    if (themeSwatches.length > 0) {
+        themeSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const theme = swatch.dataset.theme;
+                updateActiveSwatch(theme);
+                updateThemeSettings({ themeColor: theme });
+            });
+        });
+    }
+
     if (settingsBtn && settingsModal) {
         settingsBtn.addEventListener('click', () => {
             // Sync UI state before showing
-            chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true } }, (res) => {
+            chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, themeColor: 'default' } }, (res) => {
                 const settings = res.themeSettings;
                 if (toggleMesh) {
                     toggleMesh.checked = settings.bgMesh;
@@ -74,6 +98,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     updateToggleState(settings.bgMesh);
                 }
                 if (toggleGlass) toggleGlass.checked = settings.tabGlass;
+
+                // Sync Theme Swatch
+                updateActiveSwatch(settings.themeColor);
+
                 settingsModal.classList.remove('hidden');
             });
         });
@@ -142,6 +170,13 @@ async function applyTheme() {
         } else {
             document.body.classList.remove('flat-tabs');
         }
+    }
+
+    // 3. Color Theme
+    document.body.classList.remove('theme-sunset', 'theme-forest', 'theme-berry', 'theme-monochrome');
+
+    if (settings.themeColor && settings.themeColor !== 'default') {
+        document.body.classList.add(`theme-${settings.themeColor}`);
     }
 
     // Legacy cleanup (remove simple-theme if it persisted)
