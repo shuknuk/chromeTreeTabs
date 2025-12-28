@@ -4,6 +4,8 @@
   <img src="icons/logo.svg" alt="ZenTree Tabs Logo" width="128" />
   <h3>Vertical Tab Manager for Chrome</h3>
   <p>Minimalist. Tree-Style. Native.</p>
+  <br />
+  <video src="demoVideo.mov" controls width="80%"></video>
 </div>
 
 <br />
