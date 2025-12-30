@@ -27,7 +27,9 @@
 
     --border-color: rgba(0, 0, 0, 0.06);
 
-    --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-family:
+        -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
     --radius-md: 16px;
     --radius-sm: 10px;
     --transition-speed: 0.25s;
@@ -111,7 +113,7 @@ body {
 /* Simulated Mesh Background */
 body::before,
 body::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 600px;
     height: 600px;
@@ -254,7 +256,7 @@ body::after {
 }
 
 .color-option::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     border-radius: 10px;
@@ -316,7 +318,12 @@ body::after {
 
 .settings-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--border-color),
+        transparent
+    );
     margin: 16px 0;
 }
 
@@ -380,7 +387,7 @@ body::after {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.2);
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 34px;
 }
 
@@ -392,16 +399,16 @@ body::after {
     left: 2px;
     bottom: 2px;
     background-color: white;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-input:checked+.slider {
+input:checked + .slider {
     background-color: var(--accent-color);
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
     transform: translateX(18px);
 }
 
@@ -478,8 +485,9 @@ input:checked+.slider:before {
 
 .theme-swatch.active {
     border: 2px solid var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 43, 107, 253), 0.2),
-                0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow:
+        0 0 0 3px rgba(var(--accent-color-rgb, 43, 107, 253), 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
 }
 
@@ -499,10 +507,12 @@ input:checked+.slider:before {
     width: 100%;
     height: 6px;
     border-radius: 3px;
-    background: linear-gradient(to right,
+    background: linear-gradient(
+        to right,
         rgba(var(--accent-color-rgb, 43, 107, 253), 0.2),
         rgba(var(--accent-color-rgb, 43, 107, 253), 0.5),
-        var(--accent-color));
+        var(--accent-color)
+    );
     outline: none;
     -webkit-appearance: none;
     appearance: none;
@@ -855,7 +865,11 @@ body.flat-tabs .tab-item.active {
     font-weight: 700;
     margin-bottom: 0;
     letter-spacing: -0.015em;
-    background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
+    background: linear-gradient(
+        90deg,
+        var(--text-primary),
+        var(--text-secondary)
+    );
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1015,7 +1029,7 @@ body.flat-tabs .tab-item.active {
 
 /* Active Indicator */
 .tab-item.active::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 4px;
     top: 50%;
@@ -1209,10 +1223,38 @@ body.flat-tabs .tab-item.active {
     background: rgba(0, 0, 0, 0.02);
     /* Slight darken for separation */
     border-top: 1px solid var(--glass-border);
+    opacity: 1;
+    animation: fadeIn 0.3s ease-in-out;
+    transition:
+        opacity 0.3s ease-in-out,
+        max-height 0.3s ease-in-out;
 }
 
 .bookmarks-section.hidden {
     display: none;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
 }
 
 .section-header {
@@ -1226,6 +1268,58 @@ body.flat-tabs .tab-item.active {
     color: var(--text-secondary);
     text-transform: uppercase;
     background: transparent;
+    position: relative;
+}
+
+.section-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+
+.section-close-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+.section-close-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not(.force-light) .section-close-btn {
+        color: var(--text-secondary);
+    }
+
+    :root:not(.force-light) .section-close-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+    }
+}
+
+:root.force-dark .section-close-btn {
+    color: var(--text-secondary);
+}
+
+:root.force-dark .section-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
 }
 
 .bookmarks-list {
@@ -1628,7 +1722,7 @@ body.flat-tabs .group-action-btn:hover {
 
 /* --- Drag Indicators --- */
 .tab-item.drop-above::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -2px;
     left: 4px;
@@ -1641,7 +1735,7 @@ body.flat-tabs .group-action-btn:hover {
 }
 
 .tab-item.drop-below::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -2px;
     left: 4px;
@@ -1655,5 +1749,7 @@ body.flat-tabs .group-action-btn:hover {
 
 .tab-item.drop-inside {
     background: var(--active-bg);
-    box-shadow: inset 0 0 0 2px var(--accent-color), 0 0 12px var(--accent-glow);
+    box-shadow:
+        inset 0 0 0 2px var(--accent-color),
+        0 0 12px var(--accent-glow);
 }

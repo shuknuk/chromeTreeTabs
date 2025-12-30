@@ -1,266 +1,558 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ZenTree Tabs</title>
+        <link rel="stylesheet" href="style.css" />
+        <script src="sidepanel.js" defer></script>
+    </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZenTree Tabs</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="sidepanel.js" defer></script>
-</head>
+    <body>
+        <div class="app-container">
+            <!-- Header / Search (Arc-style command bar vibe) -->
+            <header class="glass-header">
+                <div class="search-container">
+                    <div class="header">
+                        <div class="brand">
+                            <img
+                                src="icons/logo.svg"
+                                class="brand-logo"
+                                alt="ZenTree Logo"
+                            />
+                            <div class="header-title">ZenTree Tabs</div>
+                        </div>
+                        <input
+                            type="text"
+                            id="tab-search"
+                            class="search-bar"
+                            placeholder="Search tabs..."
+                        />
+                    </div>
+                </div>
+            </header>
 
-<body>
-  <div class="app-container">
-    <!-- Header / Search (Arc-style command bar vibe) -->
-    <header class="glass-header">
-      <div class="search-container">
-        <div class="header">
-          <div class="brand">
-            <img src="icons/logo.svg" class="brand-logo" alt="ZenTree Logo">
-            <div class="header-title">ZenTree Tabs</div>
-          </div>
-          <input type="text" id="tab-search" class="search-bar" placeholder="Search tabs...">
-        </div>
-      </div>
-    </header>
+            <!-- Tab Tree Container -->
+            <main id="tabs-list" class="tabs-list">
+                <!-- Tabs will be injected here by sidepanel.js -->
+            </main>
 
-    <!-- Tab Tree Container -->
-    <main id="tabs-list" class="tabs-list">
-      <!-- Tabs will be injected here by sidepanel.js -->
-    </main>
+            <div class="section-divider"></div>
 
-    <div class="section-divider"></div>
+            <section id="bookmarks-section" class="bookmarks-section">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <span>BOOKMARKS</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center">
+                        <button
+                            id="refresh-bookmarks"
+                            class="icon-small"
+                            title="Refresh"
+                        >
+                            <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path
+                                    d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                                ></path>
+                            </svg>
+                        </button>
+                        <button
+                            id="close-bookmarks"
+                            class="section-close-btn"
+                            title="Close"
+                        >
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="bookmarks-list" class="bookmarks-list">
+                    <!-- Bookmarks injected here -->
+                </div>
+            </section>
 
-    <section id="bookmarks-section" class="bookmarks-section">
-      <div class="section-header">
-        <span>BOOKMARKS</span>
-        <button id="refresh-bookmarks" class="icon-small" title="Refresh">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
-        </button>
-      </div>
-      <div id="bookmarks-list" class="bookmarks-list">
-        <!-- Bookmarks injected here -->
-      </div>
-    </section>
+            <section id="downloads-section" class="bookmarks-section hidden">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <span>DOWNLOADS</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center">
+                        <button
+                            id="refresh-downloads"
+                            class="icon-small"
+                            title="Refresh"
+                        >
+                            <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path
+                                    d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                                ></path>
+                            </svg>
+                        </button>
+                        <button
+                            id="close-downloads"
+                            class="section-close-btn"
+                            title="Close"
+                        >
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="downloads-list" class="bookmarks-list">
+                    <!-- Downloads injected here -->
+                </div>
+            </section>
 
-    <section id="downloads-section" class="bookmarks-section hidden">
-      <div class="section-header">
-        <span>DOWNLOADS</span>
-        <button id="refresh-downloads" class="icon-small" title="Refresh">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
-        </button>
-      </div>
-      <div id="downloads-list" class="bookmarks-list">
-        <!-- Downloads injected here -->
-      </div>
-    </section>
+            <section id="groups-section" class="bookmarks-section hidden">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <span>TAB GROUPS</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center">
+                        <button
+                            id="refresh-groups"
+                            class="icon-small"
+                            title="Refresh"
+                        >
+                            <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path
+                                    d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                                ></path>
+                            </svg>
+                        </button>
+                        <button
+                            id="close-groups"
+                            class="section-close-btn"
+                            title="Close"
+                        >
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="groups-list" class="bookmarks-list">
+                    <!-- Tab Groups injected here -->
+                </div>
+            </section>
 
-    <section id="groups-section" class="bookmarks-section hidden">
-      <div class="section-header">
-        <span>TAB GROUPS</span>
-        <button id="refresh-groups" class="icon-small" title="Refresh">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
-        </button>
-      </div>
-      <div id="groups-list" class="bookmarks-list">
-        <!-- Tab Groups injected here -->
-      </div>
-    </section>
-
-    <!-- Color Picker Modal -->
-    <div id="color-picker-modal" class="color-picker-modal hidden">
-      <div class="color-picker-content">
-        <div class="color-picker-header">
-          <h4>Choose Group Color</h4>
-          <button id="close-color-picker" class="icon-small">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        <div class="color-picker-grid" id="color-picker-grid">
-          <!-- Color options will be injected here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer (Optional controls) -->
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="settings-modal hidden">
-      <div class="settings-content">
-        <div class="settings-header">
-          <h3>⚙️ Appearance</h3>
-          <button id="close-settings" class="icon-small">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-
-        <div class="settings-section">
-          <div class="section-title">Visual Effects</div>
-
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Background Mesh</span>
-              <span class="setting-desc">Animated gradient orbs</span>
+            <!-- Color Picker Modal -->
+            <div id="color-picker-modal" class="color-picker-modal hidden">
+                <div class="color-picker-content">
+                    <div class="color-picker-header">
+                        <h4>Choose Group Color</h4>
+                        <button id="close-color-picker" class="icon-small">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="color-picker-grid" id="color-picker-grid">
+                        <!-- Color options will be injected here -->
+                    </div>
+                </div>
             </div>
-            <label class="switch">
-              <input type="checkbox" id="toggle-mesh">
-              <span class="slider round"></span>
-            </label>
-          </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Glassy Tabs</span>
-              <span class="setting-desc">Frosted glass effect</span>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="toggle-glass">
-              <span class="slider round"></span>
-            </label>
-          </div>
+            <!-- Footer (Optional controls) -->
+            <!-- Settings Modal -->
+            <div id="settings-modal" class="settings-modal hidden">
+                <div class="settings-content">
+                    <div class="settings-header">
+                        <h3>⚙️ Appearance</h3>
+                        <button id="close-settings" class="icon-small">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
 
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Blur Intensity</span>
-              <span class="setting-desc">Backdrop blur strength</span>
+                    <div class="settings-section">
+                        <div class="section-title">Visual Effects</div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <span>Background Mesh</span>
+                                <span class="setting-desc"
+                                    >Animated gradient orbs</span
+                                >
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-mesh" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <span>Glassy Tabs</span>
+                                <span class="setting-desc"
+                                    >Frosted glass effect</span
+                                >
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-glass" />
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <span>Blur Intensity</span>
+                                <span class="setting-desc"
+                                    >Backdrop blur strength</span
+                                >
+                            </div>
+                            <div class="slider-container">
+                                <input
+                                    type="range"
+                                    id="blur-intensity"
+                                    min="0"
+                                    max="2"
+                                    step="1"
+                                    value="1"
+                                    class="intensity-slider"
+                                />
+                                <div class="slider-labels">
+                                    <span>Light</span>
+                                    <span>Medium</span>
+                                    <span>Heavy</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Color Scheme</div>
+                        <div class="setting-row">
+                            <div class="setting-label">
+                                <span>Mode</span>
+                                <span class="setting-desc"
+                                    >Light, dark, or follow system</span
+                                >
+                            </div>
+                            <select
+                                id="color-scheme-select"
+                                class="scheme-select"
+                            >
+                                <option value="system">System</option>
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <div class="settings-section">
+                        <div class="section-title">Theme</div>
+                        <div class="theme-selector">
+                            <button
+                                class="theme-swatch active"
+                                data-theme="default"
+                                title="Ocean (Default)"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #e9f0ff,
+                                        #e0f6ff
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Ocean</span>
+                            </button>
+                            <button
+                                class="theme-swatch"
+                                data-theme="sunset"
+                                title="Sunset"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #ff9a9e,
+                                        #fecfef
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Sunset</span>
+                            </button>
+                            <button
+                                class="theme-swatch"
+                                data-theme="forest"
+                                title="Forest"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #84fab0,
+                                        #8fd3f4
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Forest</span>
+                            </button>
+                            <button
+                                class="theme-swatch"
+                                data-theme="berry"
+                                title="Berry"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #a18cd1,
+                                        #fbc2eb
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Berry</span>
+                            </button>
+                            <button
+                                class="theme-swatch"
+                                data-theme="monochrome"
+                                title="Monochrome"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #bdc3c7,
+                                        #2c3e50
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Mono</span>
+                            </button>
+                            <button
+                                class="theme-swatch"
+                                data-theme="lavender"
+                                title="Lavender"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #e0c3fc,
+                                        #8ec5fc
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Lavender</span>
+                            </button>
+                            <button
+                                class="theme-swatch"
+                                data-theme="mint"
+                                title="Mint"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #d299c2,
+                                        #fef9d7
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Mint</span>
+                            </button>
+                            <button
+                                class="theme-swatch"
+                                data-theme="neon"
+                                title="Neon"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #ff6ec7,
+                                        #7efff5
+                                    );
+                                "
+                            >
+                                <span class="theme-name">Neon</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="slider-container">
-              <input type="range" id="blur-intensity" min="0" max="2" step="1" value="1" class="intensity-slider">
-              <div class="slider-labels">
-                <span>Light</span>
-                <span>Medium</span>
-                <span>Heavy</span>
-              </div>
-            </div>
-          </div>
+
+            <!-- Footer (Optional controls) -->
+            <footer class="glass-footer">
+                <button id="settings-btn" class="icon-btn" title="Settings">
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                        ></path>
+                    </svg>
+                </button>
+                <div style="flex-grow: 1"></div>
+                <!-- Spacer -->
+                <button
+                    id="toggle-bookmarks-btn"
+                    class="icon-btn"
+                    title="Toggle Bookmarks"
+                >
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path
+                            d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+                        ></path>
+                    </svg>
+                </button>
+                <button
+                    id="toggle-downloads-btn"
+                    class="icon-btn"
+                    title="Toggle Downloads"
+                >
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path
+                            d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                        ></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <span id="downloads-badge" class="icon-badge hidden"
+                        >0</span
+                    >
+                </button>
+                <button
+                    id="toggle-groups-btn"
+                    class="icon-btn"
+                    title="Toggle Tab Groups"
+                >
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </button>
+                <button id="new-tab-btn" class="icon-btn" title="New Tab">
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            </footer>
         </div>
-
-        <div class="settings-divider"></div>
-
-        <div class="settings-section">
-          <div class="section-title">Color Scheme</div>
-          <div class="setting-row">
-            <div class="setting-label">
-              <span>Mode</span>
-              <span class="setting-desc">Light, dark, or follow system</span>
-            </div>
-            <select id="color-scheme-select" class="scheme-select">
-              <option value="system">System</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="settings-divider"></div>
-
-        <div class="settings-section">
-          <div class="section-title">Theme</div>
-          <div class="theme-selector">
-            <button class="theme-swatch active" data-theme="default" title="Ocean (Default)"
-              style="background: linear-gradient(135deg, #e9f0ff, #e0f6ff);">
-              <span class="theme-name">Ocean</span>
-            </button>
-            <button class="theme-swatch" data-theme="sunset" title="Sunset"
-              style="background: linear-gradient(135deg, #ff9a9e, #fecfef);">
-              <span class="theme-name">Sunset</span>
-            </button>
-            <button class="theme-swatch" data-theme="forest" title="Forest"
-              style="background: linear-gradient(135deg, #84fab0, #8fd3f4);">
-              <span class="theme-name">Forest</span>
-            </button>
-            <button class="theme-swatch" data-theme="berry" title="Berry"
-              style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">
-              <span class="theme-name">Berry</span>
-            </button>
-            <button class="theme-swatch" data-theme="monochrome" title="Monochrome"
-              style="background: linear-gradient(135deg, #bdc3c7, #2c3e50);">
-              <span class="theme-name">Mono</span>
-            </button>
-            <button class="theme-swatch" data-theme="lavender" title="Lavender"
-              style="background: linear-gradient(135deg, #e0c3fc, #8ec5fc);">
-              <span class="theme-name">Lavender</span>
-            </button>
-            <button class="theme-swatch" data-theme="mint" title="Mint"
-              style="background: linear-gradient(135deg, #d299c2, #fef9d7);">
-              <span class="theme-name">Mint</span>
-            </button>
-            <button class="theme-swatch" data-theme="neon" title="Neon"
-              style="background: linear-gradient(135deg, #ff6ec7, #7efff5);">
-              <span class="theme-name">Neon</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer (Optional controls) -->
-    <footer class="glass-footer">
-      <button id="settings-btn" class="icon-btn" title="Settings">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path
-            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-          </path>
-        </svg>
-      </button>
-      <div style="flex-grow:1"></div> <!-- Spacer -->
-      <button id="toggle-bookmarks-btn" class="icon-btn" title="Toggle Bookmarks">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-        </svg>
-      </button>
-      <button id="toggle-downloads-btn" class="icon-btn" title="Toggle Downloads">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        <span id="downloads-badge" class="icon-badge hidden">0</span>
-      </button>
-      <button id="toggle-groups-btn" class="icon-btn" title="Toggle Tab Groups">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-      </button>
-      <button id="new-tab-btn" class="icon-btn" title="New Tab">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-      </button>
-    </footer>
-  </div>
-</body>
-
+    </body>
 </html>
