@@ -4,13 +4,19 @@
   <img src="icons/logo.svg" alt="ZenTree Tabs Logo" width="128" />
   <h3>Vertical Tab Manager for Chrome</h3>
   <p>Minimalist. Tree-Style. Native.</p>
-  <br />
-  <video src="demoVideo.mov" controls width="80%"></video>
 </div>
 
 <br />
 
 **ZenTree Tabs** is a modern Chrome Extension that organizes your tabs into a vertical tree structure appearing in the Chrome Side Panel. Inspired by the "Arc" browser aesthetic, it brings order to your browsing chaos with automatic nesting, native group support, and a fluid, glassmorphic UI.
+
+## 🎥 Demo
+
+<div align="center">
+  <img src="demo.gif" alt="ZenTree Tabs Demo" width="100%" />
+</div>
+
+*Experience ZenTree Tabs in action - see the vertical tree layout, drag & drop, theming, and more!*
 
 ## ✨ Key Features
 
