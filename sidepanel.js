@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (settingsBtn && settingsModal) {
         settingsBtn.addEventListener('click', () => {
             // Sync UI state before showing
-            chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, themeColor: 'default' } }, (res) => {
+            chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, themeColor: 'default', blurIntensity: 1 } }, (res) => {
                 const settings = res.themeSettings;
                 if (toggleMesh) {
                     toggleMesh.checked = settings.bgMesh;
@@ -101,6 +101,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Sync Theme Swatch
                 updateActiveSwatch(settings.themeColor);
+
+                // Sync Blur Intensity
+                const blurSlider = document.getElementById('blur-intensity');
+                if (blurSlider) blurSlider.value = settings.blurIntensity || 1;
 
                 settingsModal.classList.remove('hidden');
             });
@@ -136,6 +140,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Blur Intensity Listener
+    const blurSlider = document.getElementById('blur-intensity');
+    if (blurSlider) {
+        blurSlider.addEventListener('input', () => {
+            updateThemeSettings({ blurIntensity: parseInt(blurSlider.value) });
+        });
+    }
+
     // Theme Logic
     await applyTheme();
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -152,7 +164,7 @@ async function updateThemeSettings(partialSettings) {
 }
 
 async function applyTheme() {
-    const res = await chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true } });
+    const res = await chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, blurIntensity: 1 } });
     const settings = res.themeSettings;
 
     // 1. Background Mesh (Master Switch)
@@ -172,8 +184,16 @@ async function applyTheme() {
         }
     }
 
-    // 3. Color Theme
-    document.body.classList.remove('theme-sunset', 'theme-forest', 'theme-berry', 'theme-monochrome');
+    // 3. Blur Intensity
+    document.body.classList.remove('blur-light', 'blur-medium', 'blur-heavy');
+    const blurLevels = ['blur-light', 'blur-medium', 'blur-heavy'];
+    const blurIntensity = settings.blurIntensity || 1;
+    if (blurIntensity >= 0 && blurIntensity <= 2) {
+        document.body.classList.add(blurLevels[blurIntensity]);
+    }
+
+    // 4. Color Theme
+    document.body.classList.remove('theme-sunset', 'theme-forest', 'theme-berry', 'theme-monochrome', 'theme-lavender', 'theme-mint', 'theme-neon');
 
     if (settings.themeColor && settings.themeColor !== 'default') {
         document.body.classList.add(`theme-${settings.themeColor}`);
@@ -1493,20 +1513,75 @@ function showRenameDialog(group) {
     }
 }
 
+let currentGroupForColorPicker = null;
+
 function showColorPicker(group) {
-    const colors = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
-    const colorNames = {
-        grey: 'Grey', blue: 'Blue', red: 'Red', yellow: 'Yellow',
-        green: 'Green', pink: 'Pink', purple: 'Purple', cyan: 'Cyan', orange: 'Orange'
-    };
+    currentGroupForColorPicker = group;
+    const modal = document.getElementById('color-picker-modal');
+    const grid = document.getElementById('color-picker-grid');
 
-    const colorOptions = colors.map((c, i) => `${i + 1}. ${colorNames[c]}`).join('\n');
-    const choice = prompt(`Choose a color:\n${colorOptions}\n\nEnter number (1-9):`, '');
+    if (!modal || !grid) return;
 
-    if (choice && choice >= 1 && choice <= 9) {
-        const selectedColor = colors[choice - 1];
-        chrome.tabGroups.update(group.id, { color: selectedColor })
-            .then(() => fetchAndRenderGroups())
+    const colors = [
+        { id: 'grey', name: 'Grey', color: '#bdc1c6' },
+        { id: 'blue', name: 'Blue', color: '#8ab4f8' },
+        { id: 'red', name: 'Red', color: '#f28b82' },
+        { id: 'yellow', name: 'Yellow', color: '#fdd663' },
+        { id: 'green', name: 'Green', color: '#81c995' },
+        { id: 'pink', name: 'Pink', color: '#ff8bcb' },
+        { id: 'purple', name: 'Purple', color: '#c58af9' },
+        { id: 'cyan', name: 'Cyan', color: '#78d9ec' },
+        { id: 'orange', name: 'Orange', color: '#fcad70' }
+    ];
+
+    grid.innerHTML = '';
+    colors.forEach(color => {
+        const option = document.createElement('button');
+        option.className = 'color-option';
+        option.style.background = color.color;
+        option.innerHTML = `<span class="color-option-name">${color.name}</span>`;
+        option.addEventListener('click', () => {
+            selectGroupColor(color.id);
+        });
+        grid.appendChild(option);
+    });
+
+    modal.classList.remove('hidden');
+}
+
+function selectGroupColor(colorId) {
+    if (currentGroupForColorPicker) {
+        chrome.tabGroups.update(currentGroupForColorPicker.id, { color: colorId })
+            .then(() => {
+                fetchAndRenderGroups();
+                closeColorPicker();
+            })
             .catch(err => console.error("Failed to change color", err));
     }
 }
+
+function closeColorPicker() {
+    const modal = document.getElementById('color-picker-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        currentGroupForColorPicker = null;
+    }
+}
+
+// Add event listeners for color picker
+document.addEventListener('DOMContentLoaded', () => {
+    const closeColorPickerBtn = document.getElementById('close-color-picker');
+    const colorPickerModal = document.getElementById('color-picker-modal');
+
+    if (closeColorPickerBtn) {
+        closeColorPickerBtn.addEventListener('click', closeColorPicker);
+    }
+
+    if (colorPickerModal) {
+        colorPickerModal.addEventListener('click', (e) => {
+            if (e.target === colorPickerModal) {
+                closeColorPicker();
+            }
+        });
+    }
+});

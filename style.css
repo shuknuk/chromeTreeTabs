@@ -120,8 +120,9 @@ body::after {
     }
 }
 
-/* --- Settings Modal --- */
-.settings-modal {
+/* --- Modals --- */
+.settings-modal,
+.color-picker-modal {
     position: absolute;
     top: 0;
     left: 0;
@@ -140,9 +141,15 @@ body::after {
     transition: opacity 0.2s;
 }
 
-.settings-modal.hidden {
+.settings-modal.hidden,
+.color-picker-modal.hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+.color-picker-modal {
+    align-items: center;
+    padding-bottom: 0;
 }
 
 .settings-content {
@@ -163,6 +170,86 @@ body::after {
     transform: translateY(20px);
 }
 
+.color-picker-content {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    width: 90%;
+    max-width: 280px;
+    padding: 20px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    transform: scale(1);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.color-picker-modal.hidden .color-picker-content {
+    transform: scale(0.9);
+}
+
+.color-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.color-picker-header h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.color-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.color-option {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.color-option::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: inherit;
+}
+
+.color-option-name {
+    position: relative;
+    z-index: 1;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.7);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+    .color-option-name {
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+}
+
 .settings-header {
     display: flex;
     justify-content: space-between;
@@ -177,14 +264,60 @@ body::after {
     color: var(--text-primary);
 }
 
+.settings-section {
+    margin-bottom: 20px;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    opacity: 0.7;
+}
+
+.settings-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    margin: 16px 0;
+}
+
 .setting-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    padding: 8px 0;
     font-size: 13px;
     color: var(--text-primary);
     transition: opacity 0.2s;
+}
+
+.setting-row:last-child {
+    margin-bottom: 0;
+}
+
+.setting-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.setting-label span:first-child {
+    font-weight: 500;
+}
+
+.setting-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.8;
 }
 
 .setting-row.disabled {
@@ -248,36 +381,131 @@ input:checked+.slider:before {
 }
 
 .theme-selector {
-    display: flex;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
     margin-bottom: 4px;
 }
 
 .theme-swatch {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
+    position: relative;
+    height: 60px;
+    border-radius: 12px;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+}
+
+.theme-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.7);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1;
 }
 
 .theme-swatch:hover {
-    transform: scale(1.1);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.theme-swatch:hover .theme-name {
+    opacity: 1;
 }
 
 .theme-swatch.active {
-    box-shadow: 0 0 0 2px var(--glass-bg), 0 0 0 4px var(--accent-color);
-    border-color: transparent !important;
-    /* override inline style border if needed, usually managed by JS or class */
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb, 43, 107, 253), 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.theme-swatch.active .theme-name {
+    opacity: 1;
+}
+
+/* Blur Intensity Slider */
+.slider-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.intensity-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right,
+        rgba(var(--accent-color-rgb, 43, 107, 253), 0.2),
+        rgba(var(--accent-color-rgb, 43, 107, 253), 0.5),
+        var(--accent-color));
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.intensity-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.intensity-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.intensity-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.intensity-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-secondary);
+    padding: 0 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .theme-name {
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
 }
 
 /* --- Granular Themes (Presets) --- */
 
 /* Default is defined in :root. We override vars for specific theme classes */
 
-/* Sunset */
+/* Sunset - Warm oranges and pinks */
 body.theme-sunset {
     --orb-1: #ff9a9e;
     --orb-2: #fecfef;
@@ -287,13 +515,14 @@ body.theme-sunset {
 
 @media (prefers-color-scheme: dark) {
     body.theme-sunset {
-        --orb-1: #5e2a2a;
-        --orb-2: #4a1e35;
+        --orb-1: #4a1f1f;
+        --orb-2: #3d1f2e;
         --accent-color: #ff8e8e;
+        --accent-glow: rgba(255, 142, 142, 0.3);
     }
 }
 
-/* Forest */
+/* Forest - Fresh greens and teals */
 body.theme-forest {
     --orb-1: #84fab0;
     --orb-2: #8fd3f4;
@@ -303,13 +532,14 @@ body.theme-forest {
 
 @media (prefers-color-scheme: dark) {
     body.theme-forest {
-        --orb-1: #1e3c2f;
-        --orb-2: #162f3a;
+        --orb-1: #1a3d33;
+        --orb-2: #1f3d4a;
         --accent-color: #55efc4;
+        --accent-glow: rgba(85, 239, 196, 0.3);
     }
 }
 
-/* Berry */
+/* Berry - Purple and pink vibes */
 body.theme-berry {
     --orb-1: #a18cd1;
     --orb-2: #fbc2eb;
@@ -319,27 +549,109 @@ body.theme-berry {
 
 @media (prefers-color-scheme: dark) {
     body.theme-berry {
-        --orb-1: #2e1e3e;
-        --orb-2: #3a162e;
+        --orb-1: #3d2456;
+        --orb-2: #4a2847;
         --accent-color: #be93d4;
+        --accent-glow: rgba(190, 147, 212, 0.3);
     }
 }
 
-/* Monochrome */
+/* Monochrome - Elegant blacks and grays */
 body.theme-monochrome {
     --orb-1: #bdc3c7;
-    --orb-2: #ecf0f1;
-    --accent-color: #2c3e50;
-    --accent-glow: rgba(44, 62, 80, 0.3);
+    --orb-2: #2c3e50;
+    --accent-color: #34495e;
+    --accent-glow: rgba(52, 73, 94, 0.3);
 }
 
 @media (prefers-color-scheme: dark) {
     body.theme-monochrome {
         --orb-1: #2c3e50;
         --orb-2: #34495e;
-        --accent-color: #ecf0f1;
+        --accent-color: #95a5a6;
+        --accent-glow: rgba(149, 165, 166, 0.3);
+    }
+}
+
+/* NEW: Lavender - Soft purple and blue */
+body.theme-lavender {
+    --orb-1: #e0c3fc;
+    --orb-2: #8ec5fc;
+    --accent-color: #7c3aed;
+    --accent-glow: rgba(124, 58, 237, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.theme-lavender {
+        --orb-1: #2d1f4a;
+        --orb-2: #1f2d4a;
+        --accent-color: #a78bfa;
+        --accent-glow: rgba(167, 139, 250, 0.3);
+    }
+}
+
+/* NEW: Mint - Cool mint and aqua */
+body.theme-mint {
+    --orb-1: #d299c2;
+    --orb-2: #fef9d7;
+    --accent-color: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.theme-mint {
+        --orb-1: #1f3d33;
+        --orb-2: #2d3d1f;
+        --accent-color: #34d399;
+        --accent-glow: rgba(52, 211, 153, 0.3);
+    }
+}
+
+/* NEW: Neon - Vibrant cyberpunk */
+body.theme-neon {
+    --orb-1: #ff6ec7;
+    --orb-2: #7efff5;
+    --accent-color: #ff00ff;
+    --accent-glow: rgba(255, 0, 255, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+    body.theme-neon {
+        --orb-1: #4a1f3d;
+        --orb-2: #1f4a47;
+        --accent-color: #ff00ff;
+        --accent-glow: rgba(255, 0, 255, 0.4);
         --text-primary: #ffffff;
     }
+}
+
+/* --- Blur Intensity Classes --- */
+
+body.blur-light {
+    --glass-blur: blur(10px);
+}
+
+body.blur-light::before,
+body.blur-light::after {
+    filter: blur(60px);
+}
+
+body.blur-medium {
+    --glass-blur: blur(20px);
+}
+
+body.blur-medium::before,
+body.blur-medium::after {
+    filter: blur(80px);
+}
+
+body.blur-heavy {
+    --glass-blur: blur(30px);
+}
+
+body.blur-heavy::before,
+body.blur-heavy::after {
+    filter: blur(100px);
 }
 
 /* --- Granular Themes (No Mesh / Flat) --- */
