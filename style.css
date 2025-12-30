@@ -117,7 +117,7 @@ body::after {
     height: 600px;
     border-radius: 50%;
     filter: blur(80px);
-    /* Heavy blur for mesh effect */
+    /* Default medium blur for mesh effect */
     opacity: 0.6;
     z-index: -1;
     pointer-events: none;
@@ -738,12 +738,12 @@ body.theme-neon {
 /* --- Blur Intensity Classes --- */
 
 body.blur-light {
-    --glass-blur: blur(10px);
+    --glass-blur: blur(8px);
 }
 
 body.blur-light::before,
 body.blur-light::after {
-    filter: blur(60px);
+    filter: blur(50px);
 }
 
 body.blur-medium {
@@ -756,12 +756,12 @@ body.blur-medium::after {
 }
 
 body.blur-heavy {
-    --glass-blur: blur(30px);
+    --glass-blur: blur(35px);
 }
 
 body.blur-heavy::before,
 body.blur-heavy::after {
-    filter: blur(100px);
+    filter: blur(120px);
 }
 
 /* --- Granular Themes (No Mesh / Flat) --- */
@@ -1004,7 +1004,12 @@ body.flat-tabs .tab-item.active {
     border-color: var(--glass-border);
     box-shadow: 0 4px 12px var(--glass-shadow);
     backdrop-filter: blur(8px);
+    font-weight: 500;
+}
+
+.tab-item.active .tab-title {
     color: var(--accent-color);
+    opacity: 1;
     font-weight: 500;
 }
 
@@ -1027,7 +1032,7 @@ body.flat-tabs .tab-item.active {
     height: 16px;
     margin-right: 12px;
     border-radius: 3px;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) brightness(1.05);
     flex-shrink: 0;
 }
 
@@ -1039,7 +1044,28 @@ body.flat-tabs .tab-item.active {
     flex-grow: 1;
     min-width: 0;
     /* Important for flex truncation */
-    opacity: 0.9;
+    color: var(--text-primary);
+    opacity: 0.95;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Better visibility in dark mode */
+@media (prefers-color-scheme: dark) {
+    :root:not(.force-light) .tab-title {
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    :root:not(.force-light) .tab-favicon {
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4)) brightness(1.1);
+    }
+}
+
+:root.force-dark .tab-title {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+:root.force-dark .tab-favicon {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4)) brightness(1.1);
 }
 
 .rename-input {
@@ -1141,12 +1167,37 @@ body.flat-tabs .tab-item.active {
     padding: 8px;
     border-radius: var(--radius-sm);
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .icon-btn:hover {
     background: var(--hover-bg);
     color: var(--text-primary);
     transform: translateY(-1px);
+}
+
+/* Badge for download counter */
+.icon-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--accent-color);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.icon-badge.hidden {
+    display: none;
 }
 
 /* --- Bookmarks Section --- */
@@ -1244,6 +1295,39 @@ body.flat-tabs .tab-item.active {
     margin-left: 8px;
     opacity: 0.8;
     white-space: nowrap;
+}
+
+/* Download progress bar */
+.download-progress {
+    width: 100%;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.download-progress-bar {
+    height: 100%;
+    background: var(--accent-color);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.download-item.in-progress {
+    border-left: 3px solid var(--accent-color);
+    padding-left: 9px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not(.force-light) .download-progress {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+:root.force-dark .download-progress {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* --- Bookmarks Tree --- */

@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Sync Blur Intensity
                 const blurSlider = document.getElementById('blur-intensity');
-                if (blurSlider) blurSlider.value = settings.blurIntensity || 1;
+                if (blurSlider) blurSlider.value = settings.blurIntensity !== undefined ? settings.blurIntensity : 1;
 
                 // Sync Color Scheme
                 const colorSchemeSelect = document.getElementById('color-scheme-select');
@@ -214,7 +214,7 @@ async function applyTheme() {
     // 3. Blur Intensity
     document.body.classList.remove('blur-light', 'blur-medium', 'blur-heavy');
     const blurLevels = ['blur-light', 'blur-medium', 'blur-heavy'];
-    const blurIntensity = settings.blurIntensity || 1;
+    const blurIntensity = settings.blurIntensity !== undefined ? settings.blurIntensity : 1;
     if (blurIntensity >= 0 && blurIntensity <= 2) {
         document.body.classList.add(blurLevels[blurIntensity]);
     }
@@ -1272,6 +1272,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshGroupsBtn = document.getElementById('refresh-groups');
     if (refreshGroupsBtn) refreshGroupsBtn.addEventListener('click', fetchAndRenderGroups);
 
+    // Downloads event listeners
+    if (chrome.downloads) {
+        // Update badge on init
+        updateDownloadsBadge();
+
+        // Listen for download changes
+        chrome.downloads.onChanged.addListener(handleDownloadChange);
+        chrome.downloads.onCreated.addListener(() => {
+            updateDownloadsBadge();
+            // Refresh downloads list if visible
+            if (downloadsSection && !downloadsSection.classList.contains('hidden')) {
+                fetchAndRenderDownloads();
+            }
+        });
+    }
+
 });
 
 // --- Downloads Logic ---
@@ -1298,6 +1314,12 @@ async function fetchAndRenderDownloads() {
 function createDownloadNode(item) {
     const container = document.createElement('div');
     container.className = 'download-item';
+    container.dataset.downloadId = item.id;
+
+    // Add in-progress class if downloading
+    if (item.state === 'in_progress') {
+        container.classList.add('in-progress');
+    }
 
     // File Icon (Generic)
     const icon = document.createElement('div');
@@ -1308,6 +1330,8 @@ function createDownloadNode(item) {
     // Info
     const info = document.createElement('div');
     info.className = 'download-info';
+    info.style.flex = '1';
+    info.style.minWidth = '0';
 
     const name = document.createElement('div');
     name.className = 'download-title';
@@ -1320,22 +1344,39 @@ function createDownloadNode(item) {
     const meta = document.createElement('div');
     meta.className = 'download-meta';
 
-    // Status Dot
-    const dot = document.createElement('div');
-    dot.className = `status-dot status-${item.state}`;
-    meta.appendChild(dot);
-
-    // Size or Status text
-    let metaText = item.state;
-    if (item.state === 'complete' || item.state === 'in_progress') {
+    // Size or Status text with progress
+    let metaText = '';
+    if (item.state === 'in_progress') {
+        const received = formatBytes(item.bytesReceived || 0);
+        const total = item.totalBytes ? formatBytes(item.totalBytes) : '?';
+        const percent = item.totalBytes ? Math.round((item.bytesReceived / item.totalBytes) * 100) : 0;
+        metaText = `${received} / ${total} (${percent}%)`;
+    } else if (item.state === 'complete') {
         const size = formatBytes(item.fileSize || item.totalBytes);
         metaText = size;
+    } else {
+        metaText = item.state;
     }
     const metaSpan = document.createElement('span');
     metaSpan.textContent = metaText;
     meta.appendChild(metaSpan);
 
     info.appendChild(meta);
+
+    // Progress bar for in-progress downloads
+    if (item.state === 'in_progress' && item.totalBytes) {
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'download-progress';
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'download-progress-bar';
+        const percent = Math.round((item.bytesReceived / item.totalBytes) * 100);
+        progressBar.style.width = `${percent}%`;
+
+        progressContainer.appendChild(progressBar);
+        info.appendChild(progressContainer);
+    }
+
     container.appendChild(info);
 
     // Click to Open
@@ -1361,6 +1402,75 @@ function formatBytes(bytes, decimals = 1) {
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+// Update the downloads badge counter
+async function updateDownloadsBadge() {
+    try {
+        const items = await chrome.downloads.search({ state: 'in_progress' });
+        const badge = document.getElementById('downloads-badge');
+
+        if (!badge) return;
+
+        const count = items.length;
+        if (count > 0) {
+            badge.textContent = count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    } catch (err) {
+        console.error("Failed to update downloads badge", err);
+    }
+}
+
+// Handle download change events
+async function handleDownloadChange(delta) {
+    console.log('Download change:', delta); // Debug log
+
+    // Update badge counter
+    updateDownloadsBadge();
+
+    // Always fetch the latest download info
+    try {
+        const results = await chrome.downloads.search({ id: delta.id });
+        if (results.length === 0) return;
+        const item = results[0];
+
+        // If downloads section is visible, update the specific download item
+        const downloadsSection = document.getElementById('downloads-section');
+        if (!downloadsSection || downloadsSection.classList.contains('hidden')) return;
+
+        const downloadItem = document.querySelector(`[data-download-id="${delta.id}"]`);
+        if (!downloadItem) {
+            // Item not in current view, refresh entire list
+            fetchAndRenderDownloads();
+            return;
+        }
+
+        // Update progress bar
+        const progressBar = downloadItem.querySelector('.download-progress-bar');
+        if (progressBar && item.totalBytes && item.state === 'in_progress') {
+            const percent = Math.round((item.bytesReceived / item.totalBytes) * 100);
+            progressBar.style.width = `${percent}%`;
+        }
+
+        // Update meta text
+        const meta = downloadItem.querySelector('.download-meta span');
+        if (meta && item.state === 'in_progress') {
+            const received = formatBytes(item.bytesReceived || 0);
+            const total = item.totalBytes ? formatBytes(item.totalBytes) : '?';
+            const percent = item.totalBytes ? Math.round((item.bytesReceived / item.totalBytes) * 100) : 0;
+            meta.textContent = `${received} / ${total} (${percent}%)`;
+        }
+
+        // If state changed to complete or interrupted, refresh the list
+        if (delta.state && (delta.state.current === 'complete' || delta.state.current === 'interrupted')) {
+            fetchAndRenderDownloads();
+        }
+    } catch (err) {
+        console.error('Error handling download change:', err);
+    }
 }
 
 // --- Tab Groups Management Logic ---
