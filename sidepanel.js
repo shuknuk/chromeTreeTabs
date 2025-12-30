@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (settingsBtn && settingsModal) {
         settingsBtn.addEventListener('click', () => {
             // Sync UI state before showing
-            chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, themeColor: 'default', blurIntensity: 1 } }, (res) => {
+            chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, themeColor: 'default', blurIntensity: 1, colorScheme: 'system' } }, (res) => {
                 const settings = res.themeSettings;
                 if (toggleMesh) {
                     toggleMesh.checked = settings.bgMesh;
@@ -105,6 +105,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Sync Blur Intensity
                 const blurSlider = document.getElementById('blur-intensity');
                 if (blurSlider) blurSlider.value = settings.blurIntensity || 1;
+
+                // Sync Color Scheme
+                const colorSchemeSelect = document.getElementById('color-scheme-select');
+                if (colorSchemeSelect) colorSchemeSelect.value = settings.colorScheme || 'system';
 
                 settingsModal.classList.remove('hidden');
             });
@@ -148,6 +152,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Color Scheme Listener
+    const colorSchemeSelect = document.getElementById('color-scheme-select');
+    if (colorSchemeSelect) {
+        colorSchemeSelect.addEventListener('change', () => {
+            updateThemeSettings({ colorScheme: colorSchemeSelect.value });
+        });
+    }
+
     // Theme Logic
     await applyTheme();
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -158,14 +170,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function updateThemeSettings(partialSettings) {
-    const res = await chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true } });
+    const res = await chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, colorScheme: 'system' } });
     const newSettings = { ...res.themeSettings, ...partialSettings };
     await chrome.storage.local.set({ themeSettings: newSettings });
 }
 
 async function applyTheme() {
-    const res = await chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, blurIntensity: 1 } });
+    const res = await chrome.storage.local.get({ themeSettings: { bgMesh: true, tabGlass: true, blurIntensity: 1, colorScheme: 'system' } });
     const settings = res.themeSettings;
+
+    // 0. Color Scheme (Light/Dark Mode)
+    const colorScheme = settings.colorScheme || 'system';
+    const root = document.documentElement;
+
+    if (colorScheme === 'light') {
+        root.classList.add('force-light');
+        root.classList.remove('force-dark');
+    } else if (colorScheme === 'dark') {
+        root.classList.add('force-dark');
+        root.classList.remove('force-light');
+    } else {
+        // system - remove both classes to use media query
+        root.classList.remove('force-light', 'force-dark');
+    }
 
     // 1. Background Mesh (Master Switch)
     if (!settings.bgMesh) {
