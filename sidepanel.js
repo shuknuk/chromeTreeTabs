@@ -11,6 +11,8 @@ let collapsedState = new Set(); // Set of tabIds whose children are hidden
 let parentOverrides = new Map(); // childId -> parentId
 let customTitles = new Map(); // tabId -> String
 let pendingScrollTabId = null;
+let selectedTabs = new Set(); // Set of tabIds that are currently selected
+let lastClickedTabId = null; // Anchor tab for shift-select range
 
 const tabsListEl = document.getElementById("tabs-list");
 const searchInput = document.getElementById("tab-search");
@@ -595,6 +597,77 @@ function createTabNode(tabId, depth = 0) {
   row.addEventListener("drop", handleDrop);
   row.addEventListener("dragend", handleDragEnd);
   row.addEventListener("click", (e) => {
+    // Handle multi-select with Ctrl/Cmd+Click
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (selectedTabs.has(tabId)) {
+        selectedTabs.delete(tabId);
+        container.classList.remove("selected");
+      } else {
+        selectedTabs.add(tabId);
+        container.classList.add("selected");
+      }
+      lastClickedTabId = tabId; // Remember for shift-select
+      if (window.updateSelectionToolbar) window.updateSelectionToolbar();
+      return;
+    }
+
+    // Handle shift-click for range selection
+    if (e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const allVisibleTabs = Array.from(
+        tabsListEl.querySelectorAll(".tab-tree-node"),
+      )
+        .map((node) => Number(node.dataset.tabId))
+        .filter((id) => !isNaN(id));
+
+      let lastSelectedId;
+
+      // Use last clicked tab as anchor, or find a sensible default
+      if (lastClickedTabId && allVisibleTabs.includes(lastClickedTabId)) {
+        lastSelectedId = lastClickedTabId;
+      } else if (selectedTabs.size > 0) {
+        lastSelectedId = Array.from(selectedTabs).pop();
+      } else {
+        // No anchor yet - use active tab or first visible tab
+        const activeTab = Array.from(tabsMap.values()).find((t) => t.active);
+        if (activeTab && allVisibleTabs.includes(activeTab.id)) {
+          lastSelectedId = activeTab.id;
+          selectedTabs.add(lastSelectedId);
+        } else {
+          lastSelectedId = allVisibleTabs[0];
+        }
+      }
+
+      const currentIndex = allVisibleTabs.indexOf(tabId);
+      const lastIndex = allVisibleTabs.indexOf(lastSelectedId);
+
+      if (currentIndex !== -1 && lastIndex !== -1) {
+        const start = Math.min(currentIndex, lastIndex);
+        const end = Math.max(currentIndex, lastIndex);
+
+        for (let i = start; i <= end; i++) {
+          const id = allVisibleTabs[i];
+          selectedTabs.add(id);
+          const node = tabsListEl.querySelector(`[data-tab-id="${id}"]`);
+          if (node) node.classList.add("selected");
+        }
+      }
+      if (window.updateSelectionToolbar) window.updateSelectionToolbar();
+      return;
+    }
+
+    // Normal click - clear selection and activate tab
+    selectedTabs.clear();
+    lastClickedTabId = tabId; // Remember for future shift-select
+    document.querySelectorAll(".tab-tree-node.selected").forEach((el) => {
+      el.classList.remove("selected");
+    });
+    if (window.updateSelectionToolbar) window.updateSelectionToolbar();
     chrome.tabs.update(tabId, { active: true });
   });
 
@@ -683,11 +756,24 @@ function createTabNode(tabId, depth = 0) {
   closeBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
   closeBtn.addEventListener("click", (e) => {
     e.stopPropagation(); // Prevent activation
-    chrome.tabs.remove(tabId);
+
+    // If this tab is selected and there are multiple selections, close all selected tabs
+    if (selectedTabs.has(tabId) && selectedTabs.size > 1) {
+      chrome.tabs.remove(Array.from(selectedTabs));
+      selectedTabs.clear();
+      if (window.updateSelectionToolbar) window.updateSelectionToolbar();
+    } else {
+      chrome.tabs.remove(tabId);
+    }
   });
   row.appendChild(closeBtn);
 
   container.appendChild(row);
+
+  // Mark as selected if in selection set
+  if (selectedTabs.has(tabId)) {
+    container.classList.add("selected");
+  }
 
   // 6. Children Container
   if (hasChildren) {
@@ -940,6 +1026,12 @@ let rafId = null;
 function handleDragStart(e) {
   draggedTabId = Number(this.parentNode.dataset.tabId);
   draggedElement = this.parentNode;
+
+  // If dragging a selected tab and there are multiple selections, drag all of them
+  if (!selectedTabs.has(draggedTabId)) {
+    selectedTabs.clear();
+    selectedTabs.add(draggedTabId);
+  }
 
   // Store the offset from the top of the element to the mouse
   const rect = this.getBoundingClientRect();
@@ -2201,4 +2293,117 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // --- Selection Toolbar Logic ---
+  const selectionToolbar = document.getElementById("selection-toolbar");
+  const selectionCount = document.getElementById("selection-count");
+  const closeSelectedBtn = document.getElementById("close-selected-btn");
+  const groupSelectedBtn = document.getElementById("group-selected-btn");
+  const clearSelectionBtn = document.getElementById("clear-selection-btn");
+
+  // Update selection toolbar visibility and count
+  function updateSelectionToolbar() {
+    if (selectedTabs.size > 0) {
+      selectionToolbar.classList.remove("hidden");
+      selectionCount.textContent = `${selectedTabs.size} selected`;
+    } else {
+      selectionToolbar.classList.add("hidden");
+    }
+  }
+
+  // Close selected tabs
+  if (closeSelectedBtn) {
+    closeSelectedBtn.addEventListener("click", () => {
+      if (selectedTabs.size > 0) {
+        chrome.tabs.remove(Array.from(selectedTabs));
+        selectedTabs.clear();
+        updateSelectionToolbar();
+      }
+    });
+  }
+
+  // Group selected tabs
+  if (groupSelectedBtn) {
+    groupSelectedBtn.addEventListener("click", async () => {
+      if (selectedTabs.size > 0) {
+        const tabIds = Array.from(selectedTabs);
+        try {
+          const group = await chrome.tabs.group({ tabIds });
+          const groupTitle = prompt("Enter group name (optional):");
+          if (groupTitle) {
+            await chrome.tabGroups.update(group, { title: groupTitle });
+          }
+          selectedTabs.clear();
+          updateSelectionToolbar();
+          fetchAndRenderTabs();
+        } catch (error) {
+          console.error("Failed to group tabs:", error);
+        }
+      }
+    });
+  }
+
+  // Clear selection
+  if (clearSelectionBtn) {
+    clearSelectionBtn.addEventListener("click", () => {
+      selectedTabs.clear();
+      document.querySelectorAll(".tab-tree-node.selected").forEach((el) => {
+        el.classList.remove("selected");
+      });
+      updateSelectionToolbar();
+    });
+  }
+
+  // Visual hint when shift key is held
+  document.addEventListener("keydown", (e) => {
+    if (e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      document.body.classList.add("shift-selecting");
+    }
+  });
+
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "Shift") {
+      document.body.classList.remove("shift-selecting");
+    }
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    // Ctrl/Cmd + A - Select all tabs
+    if ((e.ctrlKey || e.metaKey) && e.key === "a") {
+      e.preventDefault();
+      const allTabNodes = document.querySelectorAll(".tab-tree-node");
+      allTabNodes.forEach((node) => {
+        const tabId = Number(node.dataset.tabId);
+        if (!isNaN(tabId)) {
+          selectedTabs.add(tabId);
+          node.classList.add("selected");
+        }
+      });
+      updateSelectionToolbar();
+    }
+
+    // Escape - Clear selection
+    if (e.key === "Escape" && selectedTabs.size > 0) {
+      selectedTabs.clear();
+      document.querySelectorAll(".tab-tree-node.selected").forEach((el) => {
+        el.classList.remove("selected");
+      });
+      updateSelectionToolbar();
+    }
+
+    // Delete - Close selected tabs
+    if (
+      (e.key === "Delete" || e.key === "Backspace") &&
+      selectedTabs.size > 0
+    ) {
+      e.preventDefault();
+      chrome.tabs.remove(Array.from(selectedTabs));
+      selectedTabs.clear();
+      updateSelectionToolbar();
+    }
+  });
+
+  // Make updateSelectionToolbar available globally
+  window.updateSelectionToolbar = updateSelectionToolbar;
 });

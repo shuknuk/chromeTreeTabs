@@ -20,6 +20,7 @@
     --text-secondary: #5f6368;
 
     --accent-color: #2b6bfd;
+    --accent-rgb: 43, 107, 253;
     --accent-glow: rgba(43, 107, 253, 0.3);
 
     --hover-bg: rgba(255, 255, 255, 0.4);
@@ -55,6 +56,7 @@
         --text-secondary: #a0a0a0;
 
         --accent-color: #7aa7ff;
+        --accent-rgb: 122, 167, 255;
         --accent-glow: rgba(122, 167, 255, 0.25);
 
         --hover-bg: rgba(255, 255, 255, 0.06);
@@ -82,6 +84,7 @@
     --text-secondary: #a0a0a0;
 
     --accent-color: #7aa7ff;
+    --accent-rgb: 122, 167, 255;
     --accent-glow: rgba(122, 167, 255, 0.25);
 
     --hover-bg: rgba(255, 255, 255, 0.06);
@@ -909,6 +912,86 @@ body.flat-tabs .tab-item.active {
     box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+/* Selection Toolbar */
+.selection-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    margin: 0 8px 8px 8px;
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.selection-toolbar.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    display: none;
+}
+
+.selection-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.selection-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.selection-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: rgba(128, 128, 128, 0.08);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.selection-btn:hover {
+    background: var(--hover-bg);
+    border-color: var(--glass-border);
+}
+
+.selection-btn:active {
+    transform: scale(0.95);
+}
+
+.selection-btn svg {
+    opacity: 0.7;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not(.force-light) .selection-btn {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    :root:not(.force-light) .selection-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+:root.force-dark .selection-btn {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+:root.force-dark .selection-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 /* --- Tab List --- */
 .tabs-list {
     flex: 1;
@@ -1019,6 +1102,54 @@ body.flat-tabs .tab-item.active {
     box-shadow: 0 4px 12px var(--glass-shadow);
     backdrop-filter: blur(8px);
     font-weight: 500;
+}
+
+/* Selected State - Multi-select */
+.tab-tree-node.selected .tab-item {
+    background: rgba(var(--accent-rgb, 59, 130, 246), 0.15);
+    border-color: rgba(var(--accent-rgb, 59, 130, 246), 0.3);
+    box-shadow: 0 0 0 1px rgba(var(--accent-rgb, 59, 130, 246), 0.2);
+}
+
+.tab-tree-node.selected .tab-item::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 14px;
+    background-color: var(--accent-color);
+    border-radius: 4px;
+    box-shadow: 0 0 8px var(--accent-color);
+}
+
+/* Shift-selecting mode visual hint */
+body.shift-selecting .tab-item {
+    cursor: cell;
+}
+
+body.shift-selecting .tab-item:hover {
+    background: rgba(var(--accent-rgb, 59, 130, 246), 0.08);
+    border-color: rgba(var(--accent-rgb, 59, 130, 246), 0.2);
+}
+
+body.shift-selecting .tab-tree-node.selected .tab-item:hover {
+    background: rgba(var(--accent-rgb, 59, 130, 246), 0.2);
+    border-color: rgba(var(--accent-rgb, 59, 130, 246), 0.4);
+}
+
+/* Selected tabs in dark mode */
+@media (prefers-color-scheme: dark) {
+    :root:not(.force-light) .tab-tree-node.selected .tab-item {
+        background: rgba(var(--accent-rgb, 59, 130, 246), 0.2);
+        border-color: rgba(var(--accent-rgb, 59, 130, 246), 0.4);
+    }
+}
+
+:root.force-dark .tab-tree-node.selected .tab-item {
+    background: rgba(var(--accent-rgb, 59, 130, 246), 0.2);
+    border-color: rgba(var(--accent-rgb, 59, 130, 246), 0.4);
 }
 
 .tab-item.active .tab-title {

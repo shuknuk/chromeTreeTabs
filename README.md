@@ -25,6 +25,7 @@
 - **🔖 Bookmarks Manager**: integrated sidebar to view, open, and manage your bookmarks hierarchy.
 - **📥 Downloads Manager**: Track recent downloads, view their status, and open files directly from the panel.
 - **✏️ Tab Renaming**: Double-click any tab title to rename it locally (`Enter` to save, `Esc` to cancel).
+- **🎯 Multi-Select Tabs**: Select multiple tabs with `Ctrl/Cmd + Click` or `Shift + Click` for batch operations. Close, group, or manage multiple tabs at once with the selection toolbar.
 - **✋ Drag & Drop**: Reorder tabs or change their nesting hierarchy with smooth HTML5 drag-and-drop. You can also drag tabs directly into Group Headers to group them.
 - **🎨 Modern Aesthetic**: Features a "Vibe Coding" inspired UI with glassmorphism, hover effects, and full Dark Mode support.
 - **🎭 Theming Support**:
@@ -48,6 +49,7 @@
 
 - **Collapsing**: Click the arrow or title of a "Folder" (Group) to collapse it. This syncs with Chrome's native collapse state.
 - **Renaming**: Double-click a tab's text to assign a custom alias. This is stored locally and won't affect the actual page title.
+- **Multi-Select**: Hold `Ctrl/Cmd` and click tabs to select multiple. Use `Shift + Click` for range selection. Press `Ctrl/Cmd + A` to select all. See [Multi-Select Guide](guides/multi-select-guide.md) for details.
 - **New Branches**: Press `Cmd/Ctrl + T` to start a fresh branch at the root level.
 - **Context Search**: Links opened from a parent tab will automatically nest as children.
 
