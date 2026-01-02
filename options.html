@@ -1,156 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenTree Tabs Settings</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f7f9fc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #1a1a1a;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ZenTree Tabs Settings</title>
+        <style>
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                background-color: #f0e8f3;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                color: #3d3929;
+            }
 
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            width: 400px;
-            text-align: center;
-        }
+            .container {
+                background: white;
+                padding: 40px;
+                border-radius: 16px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                width: 400px;
+                text-align: center;
+            }
 
-        .logo {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-        }
+            .logo {
+                width: 64px;
+                height: 64px;
+                margin-bottom: 16px;
+            }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 8px;
+                font-weight: 700;
+            }
 
-        p.subtitle {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 32px;
-        }
+            p.subtitle {
+                font-size: 14px;
+                color: #6b6456;
+                margin-bottom: 24px;
+            }
 
-        .setting-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #fdfdfd;
-            border: 1px solid #eee;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
+            .info-section {
+                background: #f8f6f9;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 16px;
+                text-align: left;
+            }
 
-        .label-group {
-            text-align: left;
-        }
-        
-        .setting-label {
-            font-weight: 600;
-            font-size: 14px;
-            display: block;
-            margin-bottom: 4px;
-        }
+            .info-title {
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 8px;
+                color: #3d3929;
+            }
 
-        .setting-desc {
-            font-size: 12px;
-            color: #888;
-        }
+            .info-text {
+                font-size: 13px;
+                color: #6b6456;
+                line-height: 1.5;
+            }
 
-        /* Toggle Switch */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
+            .footer {
+                margin-top: 24px;
+                font-size: 12px;
+                color: #999;
+            }
 
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+            a {
+                color: #a894c2;
+                text-decoration: none;
+            }
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
+            a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <img src="icons/icon-128.png" alt="ZenTree Tabs" class="logo" />
+            <h1>ZenTree Tabs</h1>
+            <p class="subtitle">A calm, organized tab experience</p>
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        input:checked + .slider {
-            background-color: #2b6bfd;
-        }
-
-        input:focused + .slider {
-            box-shadow: 0 0 1px #2b6bfd;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(20px);
-        }
-
-        .footer {
-            margin-top: 32px;
-            font-size: 12px;
-            color: #999;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <img src="icons/icon-128.png" alt="ZenTree Tabs" class="logo">
-        <h1>ZenTree Tabs</h1>
-        <p class="subtitle">Settings</p>
-
-        <div class="setting-row">
-            <div class="label-group">
-                <span class="setting-label">Enable Glassmorphism</span>
-                <span class="setting-desc">mesh gradients & visual effects</span>
+            <div class="info-section">
+                <div class="info-title">🎨 Customize Appearance</div>
+                <div class="info-text">
+                    Open the sidebar and click the settings icon at the bottom
+                    to choose your theme and color scheme.
+                </div>
             </div>
-            <label class="switch">
-                <input type="checkbox" id="glass-toggle">
-                <span class="slider"></span>
-            </label>
-        </div>
 
-        <div class="footer">
-            Version 1.0
-        </div>
-    </div>
+            <div class="info-section">
+                <div class="info-title">✨ Features</div>
+                <div class="info-text">
+                    • Tree-style tab organization<br />
+                    • 8 beautiful pastel themes<br />
+                    • Light & dark mode support<br />
+                    • Bookmarks & downloads panels<br />
+                    • Tab groups integration
+                </div>
+            </div>
 
-    <script src="options.js"></script>
-</body>
+            <div class="footer">Version 1.0</div>
+        </div>
+    </body>
 </html>

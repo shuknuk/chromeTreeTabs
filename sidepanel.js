@@ -49,21 +49,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const settingsModal = document.getElementById("settings-modal");
   const settingsBtn = document.getElementById("settings-btn");
   const closeSettingsBtn = document.getElementById("close-settings");
-  const toggleMesh = document.getElementById("toggle-mesh");
-  const toggleGlass = document.getElementById("toggle-glass");
-
-  // Helper to update UI state of toggles
-  const updateToggleState = (meshEnabled) => {
-    if (!toggleGlass) return;
-    const row = toggleGlass.closest(".setting-row");
-    if (meshEnabled) {
-      row.classList.remove("disabled");
-      toggleGlass.disabled = false;
-    } else {
-      row.classList.add("disabled");
-      toggleGlass.disabled = true;
-    }
-  };
 
   // Theme Selector Logic
   const themeSwatches = document.querySelectorAll(".theme-swatch");
@@ -95,30 +80,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       chrome.storage.local.get(
         {
           themeSettings: {
-            bgMesh: true,
-            tabGlass: true,
-            themeColor: "default",
-            blurIntensity: 1,
+            themeColor: "minimal-blue",
             colorScheme: "system",
           },
         },
         (res) => {
           const settings = res.themeSettings;
-          if (toggleMesh) {
-            toggleMesh.checked = settings.bgMesh;
-            // Initial dependency check
-            updateToggleState(settings.bgMesh);
-          }
-          if (toggleGlass) toggleGlass.checked = settings.tabGlass;
 
           // Sync Theme Swatch
           updateActiveSwatch(settings.themeColor);
-
-          // Sync Blur Intensity
-          const blurSlider = document.getElementById("blur-intensity");
-          if (blurSlider)
-            blurSlider.value =
-              settings.blurIntensity !== undefined ? settings.blurIntensity : 1;
 
           // Sync Color Scheme
           const colorSchemeSelect = document.getElementById(
@@ -148,28 +118,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Toggle Listeners
-  if (toggleMesh) {
-    toggleMesh.addEventListener("change", () => {
-      const isEnabled = toggleMesh.checked;
-      updateToggleState(isEnabled);
-      updateThemeSettings({ bgMesh: isEnabled });
-    });
-  }
-  if (toggleGlass) {
-    toggleGlass.addEventListener("change", () => {
-      updateThemeSettings({ tabGlass: toggleGlass.checked });
-    });
-  }
-
-  // Blur Intensity Listener
-  const blurSlider = document.getElementById("blur-intensity");
-  if (blurSlider) {
-    blurSlider.addEventListener("input", () => {
-      updateThemeSettings({ blurIntensity: parseInt(blurSlider.value) });
-    });
-  }
-
   // Color Scheme Listener
   const colorSchemeSelect = document.getElementById("color-scheme-select");
   if (colorSchemeSelect) {
@@ -189,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function updateThemeSettings(partialSettings) {
   const res = await chrome.storage.local.get({
-    themeSettings: { bgMesh: true, tabGlass: true, colorScheme: "system" },
+    themeSettings: { themeColor: "minimal-blue", colorScheme: "system" },
   });
   const newSettings = { ...res.themeSettings, ...partialSettings };
   await chrome.storage.local.set({ themeSettings: newSettings });
@@ -198,15 +146,13 @@ async function updateThemeSettings(partialSettings) {
 async function applyTheme() {
   const res = await chrome.storage.local.get({
     themeSettings: {
-      bgMesh: true,
-      tabGlass: true,
-      blurIntensity: 1,
+      themeColor: "minimal-blue",
       colorScheme: "system",
     },
   });
   const settings = res.themeSettings;
 
-  // 0. Color Scheme (Light/Dark Mode)
+  // Color Scheme (Light/Dark Mode)
   const colorScheme = settings.colorScheme || "system";
   const root = document.documentElement;
 
@@ -221,49 +167,26 @@ async function applyTheme() {
     root.classList.remove("force-light", "force-dark");
   }
 
-  // 1. Background Mesh (Master Switch)
-  if (!settings.bgMesh) {
-    document.body.classList.add("no-mesh");
-    // Logic Requirement: If Master is OFF, Tabs must be FLAT (simulating "Glass Off").
-    // We override the visual state here regardless of the saved tabGlass setting.
-    document.body.classList.add("flat-tabs");
-  } else {
-    document.body.classList.remove("no-mesh");
+  // Always use flat/no-mesh for pastel themes
+  document.body.classList.add("no-mesh");
+  document.body.classList.add("flat-tabs");
 
-    // 2. Tab Glass (Only respected if Mesh is ON)
-    if (!settings.tabGlass) {
-      document.body.classList.add("flat-tabs");
-    } else {
-      document.body.classList.remove("flat-tabs");
-    }
-  }
-
-  // 3. Blur Intensity
-  document.body.classList.remove("blur-light", "blur-medium", "blur-heavy");
-  const blurLevels = ["blur-light", "blur-medium", "blur-heavy"];
-  const blurIntensity =
-    settings.blurIntensity !== undefined ? settings.blurIntensity : 1;
-  if (blurIntensity >= 0 && blurIntensity <= 2) {
-    document.body.classList.add(blurLevels[blurIntensity]);
-  }
-
-  // 4. Color Theme
+  // Color Theme - Remove all theme classes
   document.body.classList.remove(
-    "theme-sunset",
-    "theme-forest",
-    "theme-berry",
-    "theme-monochrome",
-    "theme-lavender",
-    "theme-mint",
-    "theme-neon",
+    "theme-minimal-blue",
+    "theme-minimal-slate",
+    "theme-minimal-sage",
+    "theme-minimal-rose",
+    "theme-minimal-amber",
+    "theme-minimal-indigo",
+    "theme-minimal-teal",
+    "theme-minimal-charcoal",
   );
 
-  if (settings.themeColor && settings.themeColor !== "default") {
+  // Apply the selected theme
+  if (settings.themeColor) {
     document.body.classList.add(`theme-${settings.themeColor}`);
   }
-
-  // Legacy cleanup (remove simple-theme if it persisted)
-  document.body.classList.remove("simple-theme");
 }
 
 // --- Core Data Fetching ---
